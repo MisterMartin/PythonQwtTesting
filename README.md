@@ -6,7 +6,7 @@ Trying PythonQwt with PyQt6
 pip install PyQt6
 pip install PythonQwt
 
-pip install pyqt6-tools. # Optional, if you want to use the Qt designer
+pip install pyqt6-tools. # Optional, if you want to use the Qt designer, a very large download
 
 python3 Map.py test.json
 python3 Noise.py
