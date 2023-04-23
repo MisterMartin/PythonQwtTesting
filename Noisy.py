@@ -21,15 +21,7 @@ nPeriods = 5
 nPoints = 1000
 iteration = 0
 
-def buttonReleased():
-    global noiseAmp
-    # will be 0.0 - 1.0
-    noiseAmp = np.random.random()
-    noiseLabel.setText(f'Noise: {noiseAmp: 0.2f}')
-    plot.setAxisScale(QwtPlot.yLeft, -1-noiseAmp, 1+noiseAmp)
-
-
-def plot_sinus():
+def doPlot():
     global plot
     global iteration
 
@@ -50,8 +42,15 @@ def plot_sinus():
     iteration += 1
     itLabel.setText(f'Iteration: {iteration: 010d}')
 
+def sliderChanged(val:int)->None:
+    global noiseAmp
+    # will be 0.0 - 1.0
+    noiseAmp = val/100.0
+    noiseLabel.setText(f'Noise: {noiseAmp: 0.2f}')
+    plot.setAxisScale(QwtPlot.yLeft, -1-noiseAmp, 1+noiseAmp)
+
 def timeout():
-    plot_sinus()
+    doPlot()
 
 app = QtWidgets.QApplication([])
 
@@ -63,17 +62,22 @@ mainWindow.resize(1000, 300)
 mainWindow.show()
 
 # Top widgets
-button = QtWidgets.QPushButton('Push Me', mainWindow)
-button.released.connect(buttonReleased)
+hlayout = QtWidgets.QHBoxLayout()
+
+slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+slider.setMinimum(0)
+slider.setMaximum(100)
+slider.setTickInterval(1)
+slider.valueChanged.connect(sliderChanged)
+hlayout.addWidget(slider)
 
 noiseLabel = QtWidgets.QLabel('0.00')
-itLabel = QtWidgets.QLabel('Iteration: 0')
-spacer = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-
-hlayout = QtWidgets.QHBoxLayout()
-hlayout.addWidget(button)
 hlayout.addWidget(noiseLabel)
+
+itLabel = QtWidgets.QLabel('Iteration: 0')
 hlayout.addWidget(itLabel)
+
+spacer = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
 hlayout.addItem(spacer)
 
 # Plot widget
@@ -85,13 +89,13 @@ plot.setAxisScale(QwtPlot.xBottom, -nPeriods*math.pi, nPeriods*math.pi)
 vlayout.addLayout(hlayout)
 vlayout.addWidget(plot)
 
-# Add timers
-timer1 = QtCore.QTimer()
-timer1.timeout.connect(timeout)
-timer1.start(1)
-timer2 = QtCore.QTimer()
-timer2.timeout.connect(buttonReleased)
-timer2.start(2000)
+# Set imnitial noise value
+sliderChanged(0)
+
+# Add timer
+timer = QtCore.QTimer()
+timer.timeout.connect(timeout)
+timer.start(1)
 
 # Run the event loop
 app.exec_()
